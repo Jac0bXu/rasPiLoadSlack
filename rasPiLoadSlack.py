@@ -58,6 +58,20 @@ def format_slack_message(metrics):
     
     return message
 
+def wait_for_internet_connection():
+    """Wait until internet connection is available"""
+    logger = logging.getLogger(__name__)
+    while True:
+        try:
+            # Try to connect to Slack's API endpoint
+            import socket
+            socket.create_connection(("slack.com", 443), timeout=5)
+            logger.info("Internet connection established")
+            return
+        except OSError:
+            logger.warning("No internet connection. Waiting 30 seconds...")
+            time.sleep(30)
+
 def monitor_system(token, channel_id, interval_minutes=2):
     """
     Monitor system metrics and send to Slack channel
@@ -69,6 +83,9 @@ def monitor_system(token, channel_id, interval_minutes=2):
     """
     client = WebClient(token=token)
     logger = logging.getLogger(__name__)
+    
+    # Wait for internet connection before starting
+    wait_for_internet_connection()
     
     while True:
         try:
@@ -85,6 +102,8 @@ def monitor_system(token, channel_id, interval_minutes=2):
             
         except Exception as e:
             logger.error(f"Error sending metrics: {str(e)}")
+            # If connection fails, wait for internet before continuing
+            wait_for_internet_connection()
         
         # Wait for next update
         time.sleep(interval_minutes * 60)
