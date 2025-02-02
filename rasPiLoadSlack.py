@@ -41,7 +41,7 @@ def format_slack_message(metrics):
     
     return message
 
-def monitor_system(token, channel_id, interval_minutes=5):
+def monitor_system(token, channel_id, interval_minutes=2):
     """
     Monitor system metrics and send to Slack channel
     
