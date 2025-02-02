@@ -47,7 +47,7 @@ def send_slack_alert(client, channel_id, message, severity="error"):
 def monitor_system_events():
     """Monitor system events and logs for critical issues"""
     client = setup_slack_client()
-    channel_id = os.environ.get('CHANNEL_ID')
+    channel_id = os.environ.get('FAIL_CHANNEL_ID')
     
     if not channel_id:
         raise ValueError("CHANNEL_ID not found in environment variables")
