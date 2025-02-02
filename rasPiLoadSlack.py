@@ -19,11 +19,24 @@ def get_cpu_temperature():
         return None
 
 def get_system_metrics():
+    # Check if slackSignUp.py is running
+    slack_signup_running = False
+    for proc in psutil.process_iter(['name', 'cmdline']):
+        try:
+            if 'python' in proc.info['name'].lower():
+                cmdline = proc.info.get('cmdline', [])
+                if any('slackSignUp.py' in cmd for cmd in cmdline if cmd):
+                    slack_signup_running = True
+                    break
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+
     metrics = {
         'cpu_percent': psutil.cpu_percent(interval=1),
         'memory_percent': psutil.virtual_memory().percent,
         'disk_percent': psutil.disk_usage('/').percent,
-        'cpu_temp': get_cpu_temperature()
+        'cpu_temp': get_cpu_temperature(),
+        'slack_signup_running': slack_signup_running
     }
     return metrics
 
@@ -34,14 +47,18 @@ def format_slack_message(metrics):
     message += f"💻 CPU Usage: {metrics['cpu_percent']}%\n"
     message += f"🧠 Memory Usage: {metrics['memory_percent']}%\n"
     message += f"💾 Disk Usage: {metrics['disk_percent']}%\n"
+    message += f"🤖 SlackSignUp.py: {'Running ✅' if metrics['slack_signup_running'] else 'Not Running ❌'}\n"
     
     # Add warning emojis for high values
     if metrics['cpu_percent'] > 80 or metrics['memory_percent'] > 80:
         message = "⚠️ *HIGH USAGE ALERT*\n" + message
     
+    if not metrics['slack_signup_running']:
+        message = "⚠️ *SLACK SIGNUP PROCESS NOT RUNNING*\n" + message
+    
     return message
 
-def monitor_system(token, channel_id, interval_minutes=5):
+def monitor_system(token, channel_id, interval_minutes=2):
     """
     Monitor system metrics and send to Slack channel
     
