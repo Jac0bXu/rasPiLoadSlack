@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     # Load environment variables
     USER_TOKEN = os.environ.get('SLACK_USER_TOKEN')
-    CHANNEL_ID = os.environ.get('CHANNEL_ID')
+    CHANNEL_ID = os.environ.get('TEMP_CHANNEL_ID')
     
     if not USER_TOKEN or not CHANNEL_ID:
         logger.error("Please set SLACK_USER_TOKEN and CHANNEL_ID in .env file")
