@@ -7,8 +7,8 @@ from datetime import datetime
 import logging
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Load environment variables with absolute path
+load_dotenv('/home/pol4/rasPiLoadSlack/.env')
 
 def setup_slack_client():
     """Initialize Slack client with error handling"""
