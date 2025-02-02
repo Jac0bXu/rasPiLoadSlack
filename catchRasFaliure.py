@@ -61,8 +61,15 @@ def monitor_system_events():
     j.seek_tail()
     j.get_previous()
     
+    # Initialize last message time
+    last_message_time = time.time()
+    HEARTBEAT_INTERVAL = 30 * 60  # 30 minutes in seconds
+    
     while True:
         try:
+            current_time = time.time()
+            message_sent = False
+
             # Check for system shutdown signals
             if os.path.exists("/run/systemd/shutdown/scheduled"):
                 with open("/run/systemd/shutdown/scheduled") as f:
@@ -73,6 +80,8 @@ def monitor_system_events():
                     f"System shutdown scheduled:\n{shutdown_info}",
                     "shutdown"
                 )
+                message_sent = True
+                last_message_time = current_time
 
             # Monitor journal for new error messages
             for entry in j:
@@ -111,6 +120,16 @@ def monitor_system_events():
                     "warning"
                 )
 
+            # Send heartbeat message if no alerts have been sent in the last interval
+            if not message_sent and (current_time - last_message_time) >= HEARTBEAT_INTERVAL:
+                send_slack_alert(
+                    client,
+                    channel_id,
+                    "System monitoring is active and running normally.",
+                    "info"
+                )
+                last_message_time = current_time
+
         except Exception as e:
             logging.error(f"Monitoring error: {str(e)}")
             try:
@@ -120,6 +139,7 @@ def monitor_system_events():
                     f"Monitoring script error: {str(e)}",
                     "error"
                 )
+                last_message_time = time.time()
             except:
                 pass
 
