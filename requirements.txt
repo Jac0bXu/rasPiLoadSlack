@@ -1,0 +1,4 @@
+slack-sdk
+python-dotenv
+psutil
+systemd-python 
