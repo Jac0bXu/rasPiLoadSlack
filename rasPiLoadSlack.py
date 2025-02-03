@@ -133,5 +133,5 @@ if __name__ == "__main__":
     monitor_system(
         token=USER_TOKEN,
         channel_id=CHANNEL_ID,
-        interval_minutes=2  # Send updates every 5 minutes
+        interval_minutes=5  # Send updates every 5 minutes
     )
